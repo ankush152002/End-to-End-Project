@@ -1,12 +1,12 @@
+// app.js
 const express = require('express');
 const app = express();
-const port = 8080;
+const PORT = process.env.PORT || 80;
 
 app.get('/', (req, res) => {
-  res.send('Hello from Node.js App X!');
+    res.send('Hello from Application 1!'); // Change the message for each app
 });
 
-app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
-
