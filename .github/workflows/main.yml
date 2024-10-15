@@ -1,51 +1,27 @@
-name: CI - Build and Push to Artifact Registry
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # Trigger the CI on push to the main branch
+      - main  # Change this to your desired branch
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-
     steps:
-      # Step 1: Checkout the code from the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      # Step 2: Set up Google Cloud SDK
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2  # Update to the latest version
-        with:
-          project_id: 'end-to-end-project-438607'
-          workload_identity_provider: 'projects/end-to-end-project-438607/locations/global/workloadIdentityPools/git-action'
-          service_account: 'github-actions@end-to-end-project-438607.iam.gserviceaccount.com'  # Update with your service account email
-          region: 'us-central1'  # Set your region
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_POOL }}
+        service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+        region: ${{ secrets.GCP_REGION }}
 
-      # Step 3: Configure Docker to use gcloud as a credential helper for Artifact Registry
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
-
-      # Step 4: Build and push Docker images to Artifact Registry
-      - name: Build and Push Docker Images
-        run: |
-          # Define the apps and image base
-          apps=(app1 app2 app3 app4 app5)
-          project_id="end-to-end-project-438607"
-          region="us-central1"
-          repo="hello-world-repo"
-
-          for app in "${apps[@]}"; do
-            image="us-central1-docker.pkg.dev/$project_id/$repo/hello-world-$app:latest"
-            
-            # Build the Docker image
-            docker build -t "$image" "./$app"
-            
-            # Push the Docker image
-            docker push "$image"
-          done
+    - name: Build Docker images
+      run: |
+        docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1 .
+        docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1
