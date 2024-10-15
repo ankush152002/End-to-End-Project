@@ -21,7 +21,8 @@ jobs:
         service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
         region: ${{ secrets.GCP_REGION }}
 
-    - name: Build Docker images
+    - name: Build Docker image
       run: |
+        cd node-apps/node-hello-1
         docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1 .
         docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1
