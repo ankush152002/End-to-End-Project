@@ -3,26 +3,29 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Change this to your desired branch
+      - main  # Trigger the CI on push to the main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Step 1: Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_POOL }}
-        service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
-        region: ${{ secrets.GCP_REGION }}
+      # Step 2: Set up Google Cloud SDK with Workload Identity Federation
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_POOL }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+          region: ${{ secrets.GCP_REGION }}
 
-    - name: Build Docker image
-      run: |
-        cd node-apps/node-hello-1
-        docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1 .
-        docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1
+      # Step 3: Build Docker image and push to Artifact Registry
+      - name: Build and Push Docker image for app1
+        run: |
+          cd node-apps/node-hello-1
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1 .
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hello-world-repo/hello-world-app1
