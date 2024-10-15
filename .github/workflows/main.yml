@@ -19,22 +19,19 @@ jobs:
 
       # Step 2: Set up Google Cloud SDK
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2  # Update to the latest version
         with:
           project_id: 'end-to-end-project-438607'
-          install_components: 'kubectl'
+          workload_identity_provider: 'projects/end-to-end-project-438607/locations/global/workloadIdentityPools/git-action'
+          service_account: 'github-actions@end-to-end-project-438607.iam.gserviceaccount.com'  # Update with your service account email
+          region: 'us-central1'  # Set your region
 
-      # Step 3: Authenticate to Google Cloud using Service Account Key
-      - name: Authenticate to Google Cloud
-        run: |
-          echo "${{ secrets.GCLOUD_SERVICE_KEY }}" | gcloud auth activate-service-account --key-file=-
-
-      # Step 4: Configure Docker to use gcloud as a credential helper for Artifact Registry
+      # Step 3: Configure Docker to use gcloud as a credential helper for Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      # Step 5: Build and push Docker images to Artifact Registry
+      # Step 4: Build and push Docker images to Artifact Registry
       - name: Build and Push Docker Images
         run: |
           # Define the apps and image base
